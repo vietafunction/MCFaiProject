@@ -5,7 +5,7 @@ A small Flask app that wraps `lib/crop_simulator.py` (unchanged, standard librar
 ```
 crop-sim-vercel/
 ├── app.py                 # Vercel entrypoint: serves the UI and POST /api/simulate
-├── public/index.html      # the UI (no build step, no dependencies)
+├── web/index.html         # the UI (no build step, no dependencies)
 ├── lib/crop_simulator.py  # your simulator, untouched
 └── requirements.txt       # flask
 ```

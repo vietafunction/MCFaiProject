@@ -1,21 +1,33 @@
 """Web app entrypoint for Vercel (Flask).
 
-  GET  /              -> the UI (public/index.html)
+  GET  /              -> the UI (web/index.html)
   GET  /api/simulate  -> default inputs
   POST /api/simulate  -> JSON report
 
 The simulator itself (lib/crop_simulator.py) is used unchanged.
 """
 import os
+import sys
+import traceback
 from dataclasses import asdict
 
-from flask import Flask, jsonify, request, send_from_directory
+ROOT = os.path.dirname(os.path.abspath(__file__))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)  # make `lib` importable however the host loads this file
+
+from flask import Flask, Response, jsonify, request, send_from_directory
 from werkzeug.exceptions import HTTPException
 
-from lib import crop_simulator as cs
+try:
+    from lib import crop_simulator as cs
+    STARTUP_ERROR = None
+except Exception as exc:  # shown on the page (and in the logs) instead of a blank 500
+    traceback.print_exc()
+    cs = None
+    STARTUP_ERROR = f"{type(exc).__name__}: {exc}"
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-PUBLIC = os.path.join(ROOT, "public")
+# index.html lives in web/ (bundled with the function); public/ is checked as a fallback
+UI_DIRS = [os.path.join(ROOT, "web"), os.path.join(ROOT, "public")]
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 20_000  # bytes
@@ -67,9 +79,19 @@ def no_store(resp, code=200):
     return resp
 
 
+@app.before_request
+def check_startup():
+    if STARTUP_ERROR:
+        return Response("Startup error: " + STARTUP_ERROR + "\n(files in project root: "
+                        + ", ".join(sorted(os.listdir(ROOT))) + ")", status=500, mimetype="text/plain")
+
+
 @app.get("/")
 def index():
-    return send_from_directory(PUBLIC, "index.html")
+    for d in UI_DIRS:
+        if os.path.exists(os.path.join(d, "index.html")):
+            return send_from_directory(d, "index.html")
+    return Response("index.html not found in web/ or public/", status=404, mimetype="text/plain")
 
 
 @app.get("/api/simulate")
