@@ -1,1 +1,1 @@
-# The simulator uses only the Python standard library.
+flask>=3.0
