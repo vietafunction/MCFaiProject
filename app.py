@@ -1,10 +1,10 @@
 """Web app entrypoint for Vercel (Flask).
 
-  GET  /              -> the UI (web/index.html)
+  GET  /              -> the UI (index.html)
   GET  /api/simulate  -> default inputs
   POST /api/simulate  -> JSON report
 
-The simulator itself (lib/crop_simulator.py) is used unchanged.
+The simulator itself (crop_simulator.py) is used unchanged.
 """
 import os
 import sys
@@ -13,21 +13,19 @@ from dataclasses import asdict
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 if ROOT not in sys.path:
-    sys.path.insert(0, ROOT)  # make `lib` importable however the host loads this file
+    sys.path.insert(0, ROOT)  # make crop_simulator importable however the host loads this file
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 from werkzeug.exceptions import HTTPException
 
 try:
-    from lib import crop_simulator as cs
+    import crop_simulator as cs
     STARTUP_ERROR = None
 except Exception as exc:  # shown on the page (and in the logs) instead of a blank 500
     traceback.print_exc()
     cs = None
     STARTUP_ERROR = f"{type(exc).__name__}: {exc}"
 
-# index.html lives in web/ (bundled with the function); public/ is checked as a fallback
-UI_DIRS = [os.path.join(ROOT, "web"), os.path.join(ROOT, "public")]
 
 app = Flask(__name__, static_folder=None)
 app.config["MAX_CONTENT_LENGTH"] = 20_000  # bytes
@@ -88,10 +86,9 @@ def check_startup():
 
 @app.get("/")
 def index():
-    for d in UI_DIRS:
-        if os.path.exists(os.path.join(d, "index.html")):
-            return send_from_directory(d, "index.html")
-    return Response("index.html not found in web/ or public/", status=404, mimetype="text/plain")
+    if os.path.exists(os.path.join(ROOT, "index.html")):
+        return send_from_directory(ROOT, "index.html")
+    return Response("index.html not found next to app.py", status=404, mimetype="text/plain")
 
 
 @app.get("/api/simulate")

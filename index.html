@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comoros Crop &amp; Nutrition Season Simulator</title>
+<meta name="description" content="Monte Carlo season planner for Comoros smallholders: best crops, planting plan, nutrition coverage, risk and resilience.">
+<style>
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --ink:#1f2a24; --muted:#5d6b63; --line:#dcd8cb;
+  --green:#2f6b4f; --green-2:#dcebe2; --ochre:#b7791f; --ochre-2:#f6e7c8;
+  --red:#b0392f; --red-2:#f5dcd8; --blue:#2b6a9a; --blue-2:#d9e8f3;
+  --radius:12px; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141a17; --panel:#1c2420; --ink:#e8ede9; --muted:#9baba1; --line:#2d3932;
+    --green:#6fc19a; --green-2:#1f3a2e; --ochre:#e2a84b; --ochre-2:#3a2f17;
+    --red:#ef8a80; --red-2:#44211e; --blue:#7bb7e3; --blue-2:#1c3345;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141a17; --panel:#1c2420; --ink:#e8ede9; --muted:#9baba1; --line:#2d3932;
+  --green:#6fc19a; --green-2:#1f3a2e; --ochre:#e2a84b; --ochre-2:#3a2f17;
+  --red:#ef8a80; --red-2:#44211e; --blue:#7bb7e3; --blue-2:#1c3345; --shadow:none;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header.top{padding:22px 20px 8px;max-width:1280px;margin:0 auto;display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+header.top h1{margin:0;font-size:22px;letter-spacing:-.01em}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.tbtn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit}
+.layout{max-width:1280px;margin:0 auto;padding:12px 20px 60px;display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+form.panel{padding:6px 14px 14px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+@media (max-width:900px){form.panel{position:static;max-height:none}}
+details{border-bottom:1px solid var(--line);padding:6px 0}
+details:last-of-type{border-bottom:0}
+summary{cursor:pointer;font-weight:600;padding:8px 0;list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";color:var(--muted)}
+details[open] summary::after{content:"–"}
+summary::-webkit-details-marker{display:none}
+.f{display:grid;gap:4px;margin:10px 0}
+.f label,.f .lab{font-size:13px;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+input[type=number],input[type=text],input[type=date],select{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+input[type=range]{width:100%;accent-color:var(--green)}
+.rv{float:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink)!important;margin:4px 0}
+.hint{font-size:12px;color:var(--muted);margin:0}
+button.run{width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;background:var(--green);color:#fff;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.run{color:#0d1712}}
+:root[data-theme="dark"] button.run{color:#0d1712}
+button.run:disabled{opacity:.6;cursor:wait}
+button.ghost{width:100%;margin-top:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;font:inherit}
+.out{display:grid;gap:16px;min-width:0}
+.card{padding:16px 18px}
+.card h2{margin:0 0 10px;font-size:16px}
+.card h3{margin:14px 0 6px;font-size:14px;color:var(--muted);font-weight:600}
+.empty{padding:40px 24px;text-align:center;color:var(--muted)}
+.error{padding:14px 18px;border:1px solid var(--red);background:var(--red-2);color:var(--ink);border-radius:var(--radius)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{padding:14px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.kpi .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.kpi .v{font-size:20px;font-weight:700;margin-top:2px}
+.kpi .s{font-size:12px;color:var(--muted)}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600}
+.good{background:var(--green-2);color:var(--green)}
+.warn{background:var(--ochre-2);color:var(--ochre)}
+.bad{background:var(--red-2);color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td.wrap{white-space:normal;min-width:180px}
+th{font-size:12px;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:10px;border-radius:6px;background:var(--line);position:relative;overflow:hidden}
+.bar>i{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.bar.t>i{background:var(--green)}
+.bar.b{margin-top:4px}
+.bar.b>i{background:var(--ochre)}
+.bar.r>i{background:var(--red)}
+.cov{display:grid;grid-template-columns:90px 1fr 90px;gap:10px;align-items:center;margin:10px 0}
+.cov .lab{font-size:13px}.cov .val{font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.pick{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.pick .k{font-size:12px;color:var(--muted)}.pick .v{font-weight:600}
+.alerts{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.alerts li{padding:10px 12px;border-left:4px solid var(--ochre);background:var(--ochre-2);border-radius:6px;font-size:14px}
+.alerts li.ok{border-color:var(--green);background:var(--green-2)}
+.tips{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:13px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:700px){.grid2{grid-template-columns:1fr}}
+pre.txt{white-space:pre;overflow:auto;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1px solid var(--line);padding:12px;border-radius:8px;max-height:520px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+svg text{fill:var(--muted);font:11px system-ui,sans-serif}
+.foot{max-width:1280px;margin:0 auto;padding:0 20px 40px;color:var(--muted);font-size:12.5px}
+@media print{form.panel,header .tbtn,.actions,.foot{display:none}.layout{display:block}body{background:#fff}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Crop &amp; Nutrition Season Simulator <span style="font-weight:400;color:var(--muted)">· Comoros</span></h1>
+    <p>Describe the season and the household. The simulator runs thousands of possible seasons (rain, heat, cyclones) and recommends what to plant, and what it means for food, income and risk.</p>
+  </div>
+  <button class="tbtn" id="theme" type="button" aria-label="Toggle dark mode">Dark / light</button>
+</header>
+
+<main class="layout">
+<form class="panel" id="form" autocomplete="off">
+  <details open><summary>Season &amp; climate</summary>
+    <div class="row2">
+      <div class="f"><label for="season">Season</label>
+        <select id="season"><option value="rainy">Rainy</option><option value="dry">Dry</option></select></div>
+      <div class="f"><label for="season_days">Season length (days)</label><input type="number" id="season_days" min="30" max="365" value="180"></div>
+    </div>
+    <div class="f"><label for="start_date">Planting start date <span class="hint">(blank = today)</span></label><input type="date" id="start_date"></div>
+    <div class="f"><label for="forecast_rain_mm">Forecast seasonal rainfall (mm)</label>
+      <input type="number" id="forecast_rain_mm" min="0" max="8000" value="1100">
+      <label class="chk"><input type="checkbox" id="no_forecast"> No forecast available (use history only)</label></div>
+    <div class="f" id="conf_wrap"><label for="forecast_confidence">Trust in the forecast <span class="rv" id="forecast_confidence_v">60%</span></label>
+      <input type="range" id="forecast_confidence" min="0" max="100" value="60"></div>
+    <div class="f"><label for="hist_rain_mm">Past seasonal rainfall (mm), oldest to newest</label>
+      <input type="text" id="hist_rain_mm" value="980, 1240, 870, 1350, 760, 1100, 1020, 690, 1180, 820">
+      <p class="hint">Comma-separated. 6+ values enables trend detection.</p></div>
+    <div class="row2">
+      <div class="f"><label for="mean_temp_c">Avg temperature (°C)</label><input type="number" id="mean_temp_c" step="0.5" value="27"></div>
+      <div class="f"><label for="temp_anomaly_c">Warm anomaly (°C)</label><input type="number" id="temp_anomaly_c" step="0.1" value="0.5"></div>
+    </div>
+    <div class="f"><label for="cyclone_prob">Chance of a damaging cyclone <span class="rv" id="cyclone_prob_v">20%</span></label>
+      <input type="range" id="cyclone_prob" min="0" max="100" value="20"></div>
+  </details>
+
+  <details open><summary>Land</summary>
+    <div class="row2">
+      <div class="f"><label for="land_ha">Land (hectares)</label><input type="number" id="land_ha" step="0.05" min="0.01" value="0.6"></div>
+      <div class="f"><label for="slope">Slope</label>
+        <select id="slope"><option>flat</option><option>gentle</option><option selected>moderate</option><option>steep</option></select></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label for="soil_fertility">Soil fertility</label>
+        <select id="soil_fertility"><option>low</option><option selected>medium</option><option>high</option></select></div>
+      <div class="f"><label for="labor">Labour available</label>
+        <select id="labor"><option>low</option><option selected>medium</option><option>high</option></select></div>
+    </div>
+  </details>
+
+  <details open><summary>Household</summary>
+    <div class="row3">
+      <div class="f"><label for="adults">Adults</label><input type="number" id="adults" min="0" value="2"></div>
+      <div class="f"><label for="children_5_14">Kids 5–14</label><input type="number" id="children_5_14" min="0" value="2"></div>
+      <div class="f"><label for="children_u5">Under 5</label><input type="number" id="children_u5" min="0" value="2"></div>
+    </div>
+    <div class="f"><label for="priority">Main goal</label>
+      <select id="priority">
+        <option value="nutrition" selected>Nutrition</option><option value="income">Income</option>
+        <option value="resilience">Resilience to bad seasons</option><option value="balanced">Balanced</option>
+        <option value="fast_food">Fast food (quick harvest)</option></select></div>
+    <div class="f"><label for="sell_fraction">Share of harvest sold <span class="rv" id="sell_fraction_v">30%</span></label>
+      <input type="range" id="sell_fraction" min="0" max="100" value="30"></div>
+  </details>
+
+  <details><summary>Practices &amp; water</summary>
+    <label class="chk"><input type="checkbox" id="mulch" checked> Mulching</label>
+    <label class="chk"><input type="checkbox" id="compost"> Adding compost</label>
+    <label class="chk"><input type="checkbox" id="windbreak"> Windbreak / tree belt in place</label>
+    <div class="f"><span class="lab">Soil conservation in place</span>
+      <label class="chk"><input type="checkbox" name="conservation" value="contour"> Contour planting</label>
+      <label class="chk"><input type="checkbox" name="conservation" value="terraces"> Terraces</label>
+      <label class="chk"><input type="checkbox" name="conservation" value="agroforestry"> Agroforestry</label></div>
+    <div class="row2">
+      <div class="f"><label for="irrigation_mm">Extra water (mm/season)</label><input type="number" id="irrigation_mm" min="0" value="0"></div>
+      <div class="f"><label for="garden_m2">Nutrition garden (m²)</label><input type="number" id="garden_m2" min="0" value="200"></div>
+    </div>
+  </details>
+
+  <details><summary>Advanced</summary>
+    <div class="row2">
+      <div class="f"><label for="coverage_days">Days one harvest must feed</label><input type="number" id="coverage_days" min="30" max="365" value="180"></div>
+      <div class="f"><label for="trials">Simulations</label><input type="number" id="trials" min="200" max="3000" step="100" value="2000"></div>
+    </div>
+    <div class="f"><label for="seed">Random seed</label><input type="number" id="seed" min="0" value="42">
+      <p class="hint">Same seed + same inputs = same result.</p></div>
+  </details>
+
+  <button class="run" id="run" type="submit">Run simulation</button>
+  <button class="ghost" id="reset" type="button">Reset to defaults</button>
+</form>
+
+<section class="out" id="out" aria-live="polite">
+  <div class="panel empty">Set your inputs on the left and press <b>Run simulation</b>.</div>
+</section>
+</main>
+
+<p class="foot">All agronomic values are approximate planning figures for a prototype. Calibrate with local extension-service data before using results for real decisions.</p>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pc = x => Math.round(x * 100) + "%";
+const fmt = (x, d = 0) => Number(x).toLocaleString(undefined, {minimumFractionDigits: d, maximumFractionDigits: d});
+const LABEL = {kcal: "Energy", iron: "Iron", vita: "Vitamin A", protein: "Protein"};
+let lastReport = null;
+
+/* ---------- theme ---------- */
+(function(){
+  try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+  $("theme").addEventListener("click", () => {
+    const dark = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() === "#141a17";
+    const next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("theme", next); } catch(e){}
+  });
+})();
+
+/* ---------- form <-> payload ---------- */
+for (const id of ["forecast_confidence", "cyclone_prob", "sell_fraction"]) {
+  const el = $(id), out = $(id + "_v");
+  el.addEventListener("input", () => out.textContent = el.value + "%");
+}
+$("no_forecast").addEventListener("change", e => {
+  $("forecast_rain_mm").disabled = e.target.checked;
+  $("conf_wrap").style.opacity = e.target.checked ? .4 : 1;
+  $("forecast_confidence").disabled = e.target.checked;
+});
+
+function payload() {
+  const num = id => $(id).value === "" ? null : Number($(id).value);
+  const hist = $("hist_rain_mm").value.split(/[,;\s]+/).filter(Boolean).map(Number);
+  if (hist.some(Number.isNaN)) throw new Error("Past rainfall must be numbers separated by commas.");
+  return {
+    season: $("season").value,
+    start_date: $("start_date").value,
+    season_days: num("season_days"),
+    forecast_rain_mm: $("no_forecast").checked ? null : num("forecast_rain_mm"),
+    forecast_confidence: $("forecast_confidence").value / 100,
+    hist_rain_mm: hist,
+    mean_temp_c: num("mean_temp_c"),
+    temp_anomaly_c: num("temp_anomaly_c"),
+    cyclone_prob: $("cyclone_prob").value / 100,
+    land_ha: num("land_ha"),
+    slope: $("slope").value,
+    soil_fertility: $("soil_fertility").value,
+    labor: $("labor").value,
+    adults: num("adults"), children_5_14: num("children_5_14"), children_u5: num("children_u5"),
+    priority: $("priority").value,
+    sell_fraction: $("sell_fraction").value / 100,
+    irrigation_mm: num("irrigation_mm"),
+    mulch: $("mulch").checked, compost: $("compost").checked, windbreak: $("windbreak").checked,
+    conservation: [...document.querySelectorAll('input[name="conservation"]:checked')].map(c => c.value),
+    garden_m2: num("garden_m2"),
+    coverage_days: num("coverage_days"),
+    trials: num("trials"),
+    seed: num("seed"),
+  };
+}
+
+$("reset").addEventListener("click", () => { $("form").reset(); for (const id of ["forecast_confidence","cyclone_prob","sell_fraction"]) $(id).dispatchEvent(new Event("input")); $("no_forecast").dispatchEvent(new Event("change")); });
+
+/* ---------- run ---------- */
+$("form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const btn = $("run");
+  let body;
+  try { body = payload(); } catch (e) { return showError(e.message); }
+  btn.disabled = true; btn.textContent = "Simulating…";
+  try {
+    const res = await fetch("/api/simulate", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+    const data = await res.json().catch(() => ({error: "The server returned an unreadable response."}));
+    if (!res.ok) throw new Error(data.error || ("Request failed (" + res.status + ")"));
+    lastReport = data;
+    render(data);
+    if (window.innerWidth <= 900) $("out").scrollIntoView({behavior: "smooth"});
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Run simulation";
+  }
+});
+
+function showError(msg) { $("out").innerHTML = `<div class="error"><b>Could not run the simulation.</b><br>${esc(msg)}</div>`; }
+
+/* ---------- rendering ---------- */
+const ratingClass = r => /^Secure/.test(r) ? "good" : /^Watch|^At risk/.test(r) ? "warn" : "bad";
+const levelClass = l => ({Low: "good", Moderate: "warn", High: "bad", Severe: "bad"}[l] || "warn");
+const resClass = l => ({Strong: "good", Moderate: "warn", Fragile: "bad"}[l] || "warn");
+const bar = (v, cls = "t") => `<div class="bar ${cls}"><i style="width:${Math.max(0, Math.min(100, v * 100))}%"></i></div>`;
+const tbl = (head, rows, numCols = []) =>
+  `<div class="tw"><table><thead><tr>${head.map((h, i) => `<th class="${numCols.includes(i) ? "n" : ""}">${esc(h)}</th>`).join("")}</tr></thead><tbody>` +
+  rows.map(r => `<tr>${r.map((c, i) => `<td class="${numCols.includes(i) ? "n" : ""}">${c}</td>`).join("")}</tr>`).join("") +
+  `</tbody></table></div>`;
+
+function stressChart(st) {
+  const W = 520, H = 220, L = 38, R = 12, T = 12, B = 30;
+  const x = i => L + i * (W - L - R) / (st.length - 1);
+  const y = v => T + (1 - v) * (H - T - B);
+  const line = key => st.map((s, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(s[key]).toFixed(1)).join(" ");
+  let g = "";
+  for (const t of [0, .25, .5, .75, 1]) g += `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${Math.round(t * 100)}%</text>`;
+  st.forEach((s, i) => g += `<text x="${x(i)}" y="${H - 10}" text-anchor="middle">${s.rain_pct_of_expected}%</text>`);
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Plan coverage versus rainfall">${g}
+    <path d="${line("plan_energy_coverage")}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
+    <path d="${line("plan_overall_coverage")}" fill="none" stroke="var(--ochre)" stroke-width="2.5" stroke-dasharray="6 4"/>
+    ${st.map((s, i) => `<circle cx="${x(i)}" cy="${y(s.plan_energy_coverage)}" r="3" fill="var(--green)"/>`).join("")}
+  </svg>
+  <div class="legend"><span><i style="background:var(--green)"></i>Energy met</span><span><i style="background:var(--ochre)"></i>Overall nutrition met</span><span>x-axis: rain as % of expected</span></div>`;
+}
+
+function render(d) {
+  const O = d.outcomes, R = d.rainfall, I = d.inputs, best = d.ranking[0];
+  const h = [];
+
+  h.push(`<div class="panel card"><div class="actions" style="justify-content:space-between;align-items:center">
+      <h2 style="margin:0">Season outlook</h2>
+      <div class="actions"><button class="tbtn" type="button" id="dlJson">Download JSON</button><button class="tbtn" type="button" onclick="window.print()">Print</button></div></div>
+    <p class="hint" style="margin:6px 0 12px">Expected rainfall <b>${fmt(R.mean)} mm</b> (80% range ${fmt(R.sim_p10)}–${fmt(R.sim_p90)} mm)${R.hist_mean ? `; history average ${fmt(R.hist_mean)} mm, trend ${R.trend_pct_per_decade >= 0 ? "+" : ""}${R.trend_pct_per_decade.toFixed(1)}% per decade` : ""}. Forecast weight ${pc(R.forecast_weight)}.</p>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Best crop</div><div class="v">${esc(best.name)}</div><div class="s">${fmt(best.mean_yield_kg_ha / 1000, 1)} t/ha typical</div></div>
+      <div class="kpi"><div class="k">Food security</div><div class="v"><span class="pill ${ratingClass(O.food_security_rating)}">${esc(O.food_security_rating)}</span></div><div class="s">~${fmt(O.food_gap_days_bad_season)} days short in a bad season</div></div>
+      <div class="kpi"><div class="k">Resilience</div><div class="v">${fmt(d.resilience.index)}<span style="font-size:13px;color:var(--muted)"> / 100</span></div><div class="s"><span class="pill ${resClass(d.resilience.label)}">${esc(d.resilience.label)}</span></div></div>
+      <div class="kpi"><div class="k">Child (under 5) risk</div><div class="v"><span class="pill ${levelClass(O.child_nutrition_risk)}">${esc(O.child_nutrition_risk)}</span></div><div class="s">${I.children_u5 ? I.children_u5 + " child(ren) under 5" : "no under-5s entered"}</div></div>
+      <div class="kpi"><div class="k">Expected income</div><div class="v">$${fmt(O.income_mean_usd)}</div><div class="s">bad season: $${fmt(O.income_p10_usd)}</div></div>
+    </div></div>`);
+
+  h.push(`<div class="panel card"><h2>Alerts &amp; recommendations</h2><ul class="alerts">${d.alerts.map(a => `<li class="${/^No major/.test(a) ? "ok" : ""}">${esc(a)}</li>`).join("")}</ul></div>`);
+
+  h.push(`<div class="panel card"><h2>Recommended planting plan</h2>` +
+    tbl(["Crop", "Land", "Area m²", "Plant on", "First harvest", "Expected kg", "Bad-season kg"],
+      d.plan.map(p => [`<b>${esc(p.crop)}</b>`, pc(p.share), fmt(p.area_m2), esc(p.plant_on), esc(p.first_harvest) + (p.harvest_after_season_end ? " *" : ""), fmt(p.expected_kg), fmt(p.bad_season_kg)]), [1, 2, 5, 6]) +
+    `<p class="hint">* harvest continues after the end of the season.</p><ul class="tips">${d.plan.map(p => `<li><b>${esc(p.crop)}:</b> ${esc(p.tip)}</li>`).join("")}</ul></div>`);
+
+  h.push(`<div class="panel card"><h2>Best crops this season</h2><div class="picks">` +
+    Object.entries(d.quick_picks).map(([k, v]) => `<div class="pick"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join("") + `</div><h3>Ranking</h3>` +
+    tbl(["#", "Crop", "Score", "Yield t/ha", "Bad-yr t/ha", "Fail risk", "Nutrition idx", "Income/ha", "Soil loss t/ha", "Days"],
+      d.ranking.slice(0, 8).map((r, i) => [i + 1, esc(r.name), r.score.toFixed(2), (r.mean_yield_kg_ha / 1000).toFixed(1), (r.p10_yield_kg_ha / 1000).toFixed(1), pc(r.fail_prob), r.nutrition_idx.toFixed(2), "$" + fmt(r.income_ha), r.soil_loss_t_ha.toFixed(1), r.days ?? ""]), [0, 2, 3, 4, 5, 6, 7, 8, 9]) + `</div>`);
+
+  h.push(`<div class="panel card"><h2>Household nutrition</h2>
+    <p class="hint">${pc(I.sell_fraction)} of the harvest is sold, the rest eaten; one harvest must cover ${I.coverage_days} days.</p>` +
+    Object.keys(LABEL).map(k => `<div class="cov"><div class="lab">${LABEL[k]}</div><div>${bar(O.coverage_mean[k])}${bar(O.coverage_bad_season_p10[k], "b")}</div><div class="val">${pc(O.coverage_mean[k])} / ${pc(O.coverage_bad_season_p10[k])}</div></div>`).join("") +
+    `<div class="legend"><span><i style="background:var(--green)"></i>Typical season</span><span><i style="background:var(--ochre)"></i>Bad season (1 in 10)</span></div>
+    <h3>Summary</h3><ul class="tips" style="color:var(--ink)">
+      <li>Energy shortfall: ~${fmt(O.food_gap_days_typical)} days typical, ~${fmt(O.food_gap_days_bad_season)} days in a bad season. Chance energy is below 80%: ${pc(O.prob_energy_below_80pct)}.</li>
+      <li>Food groups grown: ${O.food_groups.length} (${O.food_groups.map(esc).join(", ")}).</li>
+      <li>Diversification: bad-season overall nutrition ${pc(O.portfolio_bad_season_overall)} with this mix vs ${pc(O.monoculture_bad_season_overall)} planting only ${esc(O.monoculture_crop)}.</li>
+      <li>Iron from plants is poorly absorbed, so real iron status may be lower than shown.</li></ul></div>`);
+
+  h.push(`<div class="grid2"><div class="panel card"><h2>Risk dashboard</h2>` +
+    [["Drought season (&lt;75% of normal)", d.risk.drought_prob], ["Excess rain (&gt;135% of normal)", d.risk.excess_prob], ["Damaging cyclone", d.risk.cyclone_prob], ["Any adverse event", d.risk.any_adverse_prob]]
+      .map(([l, v]) => `<div class="cov" style="grid-template-columns:1fr 90px 40px"><div class="lab">${l}</div>${bar(v, "r")}<div class="val">${pc(v)}</div></div>`).join("") +
+    `</div><div class="panel card"><h2>Soil &amp; erosion</h2>
+      <div class="kpi"><div class="k">Estimated loss with this plan</div><div class="v">${d.soil.portfolio_t_ha.toFixed(1)} t/ha</div><div class="s">${esc(d.soil.rating)}</div></div>
+      <p class="hint" style="margin-top:8px">Bare soil would lose ${d.soil.bare_ground_t_ha.toFixed(1)} t/ha. Indicative index only, not a field measurement.</p></div></div>`);
+
+  const W = d.water;
+  h.push(`<div class="grid2"><div class="panel card"><h2>Water plan</h2><ul class="tips" style="color:var(--ink);margin-top:0">
+      <li>1-in-10 dry-season rainfall: <b>${fmt(W.dry_scenario_rain_mm)} mm</b></li>
+      <li>Average shortfall of the plan: <b>${fmt(W.land_weighted_deficit_pct)}%</b> of crop optimum</li>
+      <li>Garden (${fmt(I.garden_m2)} m²: ${W.garden_crops.map(esc).join(", ")}): shortfall ${fmt(W.garden_deficit_mm)} mm = <b>${fmt(W.garden_tank_liters_for_deficit)} L</b> stored water</li>
+      <li>Minimum one-week dry-spell buffer: <b>${fmt(W.garden_tank_liters_one_week_buffer)} L</b></li></ul></div>
+    <div class="panel card"><h2>Resilience index</h2>` +
+    Object.entries(d.resilience.parts).map(([k, v]) => `<div class="cov" style="grid-template-columns:140px 1fr 36px"><div class="lab">${esc(k.replace(/_/g, " "))}</div>${bar(v)}<div class="val">${Math.round(v * 100)}</div></div>`).join("") + `</div></div>`);
+
+  h.push(`<div class="panel card"><h2>Rainfall stress test</h2><p class="hint">Does the plan hold if the season is drier or wetter than expected?</p>${stressChart(d.stress_test)}` +
+    tbl(["Rain vs expected", "Rain mm", "Energy met", "Overall met", "Best crop at that rainfall"],
+      d.stress_test.map(s => [s.rain_pct_of_expected + "%", fmt(s.rain_mm), pc(s.plan_energy_coverage), pc(s.plan_overall_coverage), esc(s.best_crop)]), [0, 1, 2, 3]) + `</div>`);
+
+  h.push(`<div class="panel card"><h2>Agroforestry / trees</h2>` +
+    tbl(["Tree", "Fit", "Rain fit", "Years to crop", "Role"], d.trees.slice(0, 4).map(t => [`<b>${esc(t.name)}</b>`, t.score.toFixed(2), pc(t.rain_suitability), t.years_to_fruit, `<span style="white-space:normal">${esc(t.role)}</span>`]), [1, 2, 3]) + `</div>`);
+
+  if (d.excluded.length) h.push(`<div class="panel card"><h2>Crops excluded this season</h2><ul class="tips">${d.excluded.map(r => `<li><b>${esc(r.name)}:</b> ${esc(r.excluded)}</li>`).join("")}</ul></div>`);
+
+  h.push(`<details class="panel card"><summary style="padding:0">Full text report</summary><pre class="txt">${esc(d.text_report)}</pre></details>`);
+
+  $("out").innerHTML = h.join("");
+  $("dlJson").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(lastReport, null, 2)], {type: "application/json"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "crop-simulation-report.json"; a.click(); URL.revokeObjectURL(a.href);
+  });
+}
+</script>
+</body>
+</html>
