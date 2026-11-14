@@ -208,7 +208,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const pc = x => Math.round(x * 100) + "%";
 const fmt = (x, d = 0) => Number(x).toLocaleString(undefined, {minimumFractionDigits: d, maximumFractionDigits: d});
 const LABEL = {kcal: "Energy", iron: "Iron", vita: "Vitamin A", protein: "Protein"};
-let lastReport = null;
+let lastReport = null, lastBody = null;
 
 /* ---------- theme ---------- */
 (function(){
@@ -276,7 +276,7 @@ $("form").addEventListener("submit", async ev => {
     const res = await fetch("/api/simulate", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
     const data = await res.json().catch(() => ({error: "The server returned an unreadable response."}));
     if (!res.ok) throw new Error(data.error || ("Request failed (" + res.status + ")"));
-    lastReport = data;
+    lastReport = data; lastBody = body;
     render(data);
     if (window.innerWidth <= 900) $("out").scrollIntoView({behavior: "smooth"});
   } catch (e) {
@@ -377,9 +377,29 @@ function render(d) {
 
   if (d.excluded.length) h.push(`<div class="panel card"><h2>Crops excluded this season</h2><ul class="tips">${d.excluded.map(r => `<li><b>${esc(r.name)}:</b> ${esc(r.excluded)}</li>`).join("")}</ul></div>`);
 
+  h.push(`<div class="panel card" id="aiCard"><h2>Explain in simple words (AI)</h2>
+    <p class="hint">Claude rewrites the results above in plain language. It only uses the simulator's numbers.</p>
+    <div style="display:flex;gap:8px;margin:8px 0"><select id="aiLang" style="max-width:220px"><option value="en">English</option><option value="fr">Français</option><option value="zdj">Shikomori</option><option value="ar">العربية</option></select>
+    <button class="tbtn" type="button" id="aiBtn">Explain</button></div>
+    <div id="aiOut" style="white-space:pre-wrap"></div>
+    <p class="hint" id="aiNote" style="display:none">AI-written; Shikomori in particular may contain mistakes. Check with a local extension officer.</p></div>`);
+
   h.push(`<details class="panel card"><summary style="padding:0">Full text report</summary><pre class="txt">${esc(d.text_report)}</pre></details>`);
 
   $("out").innerHTML = h.join("");
+  $("aiBtn").addEventListener("click", async () => {
+    const btn = $("aiBtn"), box = $("aiOut"), lang = $("aiLang").value;
+    btn.disabled = true; btn.textContent = "Writing…"; box.textContent = "";
+    try {
+      const res = await fetch("/api/explain", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({...lastBody, language: lang})});
+      const data = await res.json().catch(() => ({error: "Unreadable server response."}));
+      if (!res.ok) throw new Error(data.error || ("Request failed (" + res.status + ")"));
+      box.dir = lang === "ar" ? "rtl" : "ltr";
+      box.textContent = data.text;
+      $("aiNote").style.display = "block";
+    } catch (e) { box.dir = "ltr"; box.textContent = "Could not get an explanation: " + e.message; }
+    finally { btn.disabled = false; btn.textContent = "Explain"; }
+  });
   $("dlJson").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(lastReport, null, 2)], {type: "application/json"});
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "crop-simulation-report.json"; a.click(); URL.revokeObjectURL(a.href);

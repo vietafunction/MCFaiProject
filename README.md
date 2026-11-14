@@ -31,3 +31,9 @@ python app.py     # http://localhost:3000
 - The planting start date defaults to the server date (UTC) when blank.
 - All agronomic parameters are approximate. Calibrate with local extension data before relying on results.
 - If the app fails at startup, the page shows the error text instead of a generic 500.
+
+## AI explainer
+`POST /api/explain` takes the same inputs as `/api/simulate` plus `"language"` (`en`, `fr`, `ar`, `zdj` = Shikomori). The server re-runs the simulation, sends only a compact summary of its results to Claude, and returns a plain-language explanation. The AI never sees free-form user text, so it can only restate the simulator's numbers.
+
+Setup: in Vercel > Project > Settings > Environment Variables add `ANTHROPIC_API_KEY` (optionally `AI_MODEL`, default `claude-sonnet-5-5`), then redeploy. Without the key the rest of the app works and the Explain button shows a "not configured" message.
+Note: Shikomori output can contain mistakes; have a native speaker check it before real use.
