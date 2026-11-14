@@ -49,9 +49,9 @@ def build_inputs(payload):
         setattr(inp, name, v)
 
     # fields the original validate() does not check
-    num("adults", 0, 50, int)
-    num("children_5_14", 0, 50, int)
-    num("children_u5", 0, 50, int)
+    num("adults", 0, 5000, int)
+    num("children_5_14", 0, 5000, int)
+    num("children_u5", 0, 5000, int)
     num("land_ha", 0.001, 1000)
     num("garden_m2", 0, 1_000_000)
     num("mean_temp_c", 5, 45)

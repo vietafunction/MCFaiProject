@@ -24,7 +24,7 @@ python app.py     # http://localhost:3000
 ```
 
 ## API
-`POST /api/simulate` with any subset of the simulator inputs (`GET /api/simulate` lists names and defaults). Unknown keys are rejected. Limits: `trials` 200-3000, household counts 0-50, `land_ha` <= 1000, body <= 20 kB. Errors return `{"error": "..."}` with HTTP 400.
+`POST /api/simulate` with any subset of the simulator inputs (`GET /api/simulate` lists names and defaults). Unknown keys are rejected. Limits: `trials` 200-3000, people counts 0-5000, `land_ha` <= 1000, body <= 20 kB. Errors return `{"error": "..."}` with HTTP 400.
 
 ## Notes
 - Results are deterministic for a given input and `seed`.

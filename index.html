@@ -122,16 +122,30 @@ svg text{fill:var(--muted);font:11px system-ui,sans-serif}
 <form class="panel" id="form" autocomplete="off">
 <div class="modes" role="group" aria-label="Form mode"><button type="button" class="tbtn" id="modeSimple" aria-pressed="true">Simple</button><button type="button" class="tbtn" id="modeDetailed" aria-pressed="false">Detailed</button></div>
 <div id="simple">
-<p class="hint" style="margin:0 0 8px">Answer these simple questions. The app turns them into the technical numbers for you. Switch to <b>Detailed</b> to see or change them.</p>
-<div class="f"><label for="s_season">Which season are you planting for?</label><select id="s_season"><option value="rainy" selected>Rainy season</option><option value="dry">Dry season</option></select></div><div class="f"><label for="s_rain">How is the rain this year compared to usual?</label><select id="s_rain"><option value="0.7">Much less rain</option><option value="0.85">A bit less rain</option><option value="1" selected>About normal</option><option value="1.15">A bit more rain</option><option value="1.3">Much more rain</option></select><p class=hint>Based on the past years' rainfall in the Detailed tab.</p></div><div class="f"><label for="s_place">Where is your farm?</label><select id="s_place"><option value="27" selected>Near the coast (warm)</option><option value="24">Middle hills</option><option value="20">High up the mountain (cooler)</option></select></div><div class="f"><label for="s_cyclone">How often do strong storms (cyclones) damage farms near you?</label><select id="s_cyclone"><option value="10">Rarely</option><option value="20" selected>Sometimes</option><option value="35">Often</option></select></div><div class="f"><label for="s_land">How much land do you have?</label><select id="s_land"><option value="0.25">Small (about a big house garden)</option><option value="0.6" selected>Medium (about half a football field)</option><option value="1.5">Large (about 2 football fields)</option><option value="3">Very large</option></select><p class=hint>1 hectare is about 1.4 football fields.</p></div><div class="f"><label for="s_slope">Is your land flat or sloped?</label><select id="s_slope"><option value="flat">Flat</option><option value="gentle">A little sloped</option><option value="moderate" selected>Hilly</option><option value="steep">Very steep</option></select></div><div class="f"><label for="s_soil">How well do crops grow in your soil?</label><select id="s_soil"><option value="low">Poorly (small, yellow plants)</option><option value="medium" selected>Okay</option><option value="high">Very well (dark, rich soil)</option></select></div><div class="f"><label for="s_labor">Who can work in the field?</label><select id="s_labor"><option value="low">Just me, or one other person</option><option value="medium" selected>A few people</option><option value="high">Many people</option></select></div><div class="row3">
-<div class="f"><label for="s_adults">Adults</label><input type="number" id="s_adults" min="0" max="50" value="2"></div>
-<div class="f"><label for="s_kids">Kids 5–14</label><input type="number" id="s_kids" min="0" max="50" value="2"></div>
-<div class="f"><label for="s_baby">Under 5</label><input type="number" id="s_baby" min="0" max="50" value="2"></div></div>
-<div class="f"><label for="s_goal">What matters most to you?</label><select id="s_goal"><option value="nutrition" selected>Feeding my family healthy food</option><option value="income">Earning money</option><option value="resilience">Not going hungry in a bad year</option><option value="balanced">A bit of everything</option><option value="fast_food">Getting food quickly</option></select></div><div class="f"><label for="s_sell">How much of the harvest do you sell?</label><select id="s_sell"><option value="0">None, we eat it all</option><option value="15">A little</option><option value="30" selected>Some</option><option value="50">About half</option><option value="75">Most of it</option></select></div><div class="f"><label for="s_water">Can you water the crops in a dry spell?</label><select id="s_water"><option value="0" selected>No</option><option value="100">Sometimes, by hand or buckets</option><option value="300">Yes, with a tank, pump or pipe</option></select></div><div class="f"><label for="s_garden">Do you have a vegetable garden?</label><select id="s_garden"><option value="0">No</option><option value="50">Small</option><option value="200" selected>Medium</option><option value="500">Large</option></select></div><div class="f"><span class="lab">What do you already do?</span>
-<label class="chk"><input type="checkbox" id="s_mulch" checked> Cover the soil with leaves or straw</label>
-<label class="chk"><input type="checkbox" id="s_compost"> Add compost or animal manure</label>
-<label class="chk"><input type="checkbox" id="s_windbreak"> Have trees or a fence that block the wind</label>
-<label class="chk"><input type="checkbox" id="s_terraces"> Have terraces (flat steps) on a slope</label></div>
+<p class="hint" style="margin:0 0 8px">Plan for your community, village or group. Answer these questions and the app works out the technical numbers. Open <b>Detailed</b> to see or change them.</p>
+<div class="f"><label for="s_season">Which season are you planting for?</label><select id="s_season"><option value="rainy" selected>Rainy season (December to April)</option><option value="dry">Cool dry season (May to November)</option></select></div>
+<div class="f"><label for="s_rain">How is the rain this year compared to usual?</label><select id="s_rain"><option value="0.7">Much less rain</option><option value="0.85">A bit less rain</option><option value="1" selected>About normal</option><option value="1.15">A bit more rain</option><option value="1.3">Much more rain</option></select><p class=hint>Compared with the past years' rainfall listed in the Detailed tab.</p></div>
+<div class="f"><label for="s_place">How high is the farmland?</label><select id="s_place"><option value="0" selected>Near the coast (warmest)</option><option value="-3">Middle slopes</option><option value="-6">High up the mountain (coolest)</option></select></div>
+<div class="f"><label for="s_cyclone">How often do strong storms (like Cyclone Kenneth) damage crops and homes in your area?</label><select id="s_cyclone"><option value="10">Rarely</option><option value="20" selected>Sometimes</option><option value="35">Often</option></select><p class=hint>Storms mostly matter in the rainy season; the app lowers the risk for the dry season.</p></div>
+<div class="f"><label for="s_land">Farmland for this plan (hectares)</label><input type="number" id="s_land" min="0.01" max="1000" step="any" value="15"><p class="hint">1 hectare = a square of 100 m × 100 m (10,000 m²).</p></div>
+<div class="f"><label for="s_slope">Is the land flat or sloped?</label><select id="s_slope"><option value="flat">Flat</option><option value="gentle">A little sloped</option><option value="moderate" selected>Hilly</option><option value="steep">Very steep</option></select><p class=hint>Steep land loses soil to heavy rain, so it matters for the plan.</p></div>
+<div class="f"><label for="s_soil">How well do crops grow in the soil?</label><select id="s_soil"><option value="low">Poorly (small, yellow plants)</option><option value="medium" selected>Okay</option><option value="high">Very well (dark, rich soil)</option></select></div>
+<div class="f"><label for="s_labor">How many people can work in the fields?</label><select id="s_labor"><option value="low">Very few</option><option value="medium" selected>A fair number</option><option value="high">Many</option></select></div>
+<div class="f"><span class="lab">How many people must this harvest feed?</span>
+<div class="row3">
+<div class="f"><label for="s_adults">Adults</label><input type="number" id="s_adults" min="0" max="5000" value="40"></div>
+<div class="f"><label for="s_kids">Children 5–14</label><input type="number" id="s_kids" min="0" max="5000" value="40"></div>
+<div class="f"><label for="s_baby">Under 5</label><input type="number" id="s_baby" min="0" max="5000" value="20"></div></div>
+<p class="hint">A family is about 5 people, so 100 people is about 20 families.</p></div>
+<div class="f"><label for="s_goal">What matters most for your community?</label><select id="s_goal"><option value="nutrition" selected>Healthy food for everyone</option><option value="income">Earning money</option><option value="resilience">Getting through bad years without hunger</option><option value="balanced">A bit of everything</option><option value="fast_food">Getting food quickly</option></select></div>
+<div class="f"><label for="s_sell">How much of the harvest will be sold at market?</label><select id="s_sell"><option value="0">None, it is all eaten</option><option value="15">A little</option><option value="30" selected>Some</option><option value="50">About half</option><option value="75">Most of it</option></select></div>
+<div class="f"><label for="s_water">Can crops be watered in a dry spell?</label><select id="s_water"><option value="0" selected>No, only rain</option><option value="100">Sometimes, by hand or buckets</option><option value="300">Yes, with a tank, pump or pipes</option></select><p class=hint>On Grande Comore there are no permanent rivers, so stored water matters.</p></div>
+<div class="f"><label for="s_garden">Is there a community or school vegetable garden?</label><select id="s_garden"><option value="0">No</option><option value="500">Small (500 m²)</option><option value="2000" selected>Medium (2,000 m²)</option><option value="5000">Large (5,000 m²)</option></select></div>
+<div class="f"><span class="lab">What is already being done?</span>
+<label class="chk"><input type="checkbox" id="s_mulch" checked> Covering the soil with leaves or straw</label>
+<label class="chk"><input type="checkbox" id="s_compost"> Adding compost or animal manure</label>
+<label class="chk"><input type="checkbox" id="s_windbreak"> Trees or a fence that block the wind</label>
+<label class="chk"><input type="checkbox" id="s_terraces"> Terraces (flat steps) on slopes</label></div>
 <div class="sum hint" id="simpleSummary"></div>
 </div>
 <div id="detailed" hidden>
@@ -297,9 +311,11 @@ function applySimple() {
   $("no_forecast").checked = false; $("no_forecast").dispatchEvent(new Event("change"));
   setVal("forecast_rain_mm", rain);
   setVal("forecast_confidence", 40);          // a farmer's feeling is not a weather forecast
-  setVal("mean_temp_c", sv("s_place"));
-  setVal("cyclone_prob", sv("s_cyclone"));
-  setVal("land_ha", sv("s_land"));
+  const temp = (sv("s_season") === "rainy" ? 27 : 23) + Number(sv("s_place"));   // coast: ~27 C Jan-Apr, ~23 C Jul-Sep; ~3 C cooler per 500 m
+  const storm = Math.round(Number(sv("s_cyclone")) * (sv("s_season") === "rainy" ? 1 : 0.2));
+  setVal("mean_temp_c", temp);
+  setVal("cyclone_prob", storm);
+  setVal("land_ha", Number(sv("s_land")) > 0 ? sv("s_land") : 0.01);
   setVal("slope", sv("s_slope"));
   setVal("soil_fertility", sv("s_soil"));
   setVal("labor", sv("s_labor"));
@@ -314,8 +330,8 @@ function applySimple() {
   $("compost").checked = $("s_compost").checked;
   $("windbreak").checked = $("s_windbreak").checked;
   for (const c of document.querySelectorAll('input[name="conservation"]')) if (c.value === "terraces") c.checked = $("s_terraces").checked;
-  $("simpleSummary").innerHTML = "The app will use: rainfall about <b>" + fmt(rain) + " mm</b>, <b>" + sv("s_land") + " ha</b> of land, " +
-    "<b>" + sv("s_cyclone") + "%</b> storm chance, temperature <b>" + sv("s_place") + " °C</b>, " + (Number(sv("s_adults")) + Number(sv("s_kids")) + Number(sv("s_baby"))) + " people.";
+  $("simpleSummary").innerHTML = "The app will use: rainfall about <b>" + fmt(rain) + " mm</b>, <b>" + fmt(Number(sv("s_land")), 1) + " ha</b> of land, " +
+    "<b>" + storm + "%</b> storm chance, temperature <b>" + temp + " °C</b>, <b>" + fmt(Number(sv("s_adults")) + Number(sv("s_kids")) + Number(sv("s_baby"))) + "</b> people to feed.";
 }
 let simpleMode = true;
 function setMode(simple) {
