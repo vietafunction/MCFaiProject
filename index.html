@@ -33,7 +33,7 @@ header.top h1{margin:0;font-size:22px;letter-spacing:-.01em}
 header.top p{margin:4px 0 0;color:var(--muted);max-width:62ch}
 .tbtn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit}
 .layout{max-width:1280px;margin:0 auto;padding:12px 20px 60px;display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
-@media (max-width:900px){.layout{grid-template-columns:1fr}}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 form.panel{padding:6px 14px 14px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
 @media (max-width:900px){form.panel{position:static;max-height:none}}
@@ -57,7 +57,7 @@ button.run{width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;b
 :root[data-theme="dark"] button.run{color:#0d1712}
 button.run:disabled{opacity:.6;cursor:wait}
 button.ghost{width:100%;margin-top:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;font:inherit}
-.out{display:grid;gap:16px;min-width:0}
+.out{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-width:0}
 .card{padding:16px 18px}
 .card h2{margin:0 0 10px;font-size:16px}
 .card h3{margin:14px 0 6px;font-size:14px;color:var(--muted);font-weight:600}
@@ -102,6 +102,11 @@ pre.txt{white-space:pre;overflow:auto;font:12px/1.45 ui-monospace,Menlo,Consolas
 svg text{fill:var(--muted);font:11px system-ui,sans-serif}
 .foot{max-width:1280px;margin:0 auto;padding:0 20px 40px;color:var(--muted);font-size:12.5px}
 @media print{form.panel,header .tbtn,.actions,.foot{display:none}.layout{display:block}body{background:#fff}}
+
+.tbtn[aria-pressed=true]{background:var(--green);color:#fff;border-color:var(--green)}
+.modes{display:flex;gap:8px;margin-bottom:10px}
+.modes .tbtn{flex:1}
+.sum{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -115,6 +120,21 @@ svg text{fill:var(--muted);font:11px system-ui,sans-serif}
 
 <main class="layout">
 <form class="panel" id="form" autocomplete="off">
+<div class="modes" role="group" aria-label="Form mode"><button type="button" class="tbtn" id="modeSimple" aria-pressed="true">Simple</button><button type="button" class="tbtn" id="modeDetailed" aria-pressed="false">Detailed</button></div>
+<div id="simple">
+<p class="hint" style="margin:0 0 8px">Answer these simple questions. The app turns them into the technical numbers for you. Switch to <b>Detailed</b> to see or change them.</p>
+<div class="f"><label for="s_season">Which season are you planting for?</label><select id="s_season"><option value="rainy" selected>Rainy season</option><option value="dry">Dry season</option></select></div><div class="f"><label for="s_rain">How is the rain this year compared to usual?</label><select id="s_rain"><option value="0.7">Much less rain</option><option value="0.85">A bit less rain</option><option value="1" selected>About normal</option><option value="1.15">A bit more rain</option><option value="1.3">Much more rain</option></select><p class=hint>Based on the past years' rainfall in the Detailed tab.</p></div><div class="f"><label for="s_place">Where is your farm?</label><select id="s_place"><option value="27" selected>Near the coast (warm)</option><option value="24">Middle hills</option><option value="20">High up the mountain (cooler)</option></select></div><div class="f"><label for="s_cyclone">How often do strong storms (cyclones) damage farms near you?</label><select id="s_cyclone"><option value="10">Rarely</option><option value="20" selected>Sometimes</option><option value="35">Often</option></select></div><div class="f"><label for="s_land">How much land do you have?</label><select id="s_land"><option value="0.25">Small (about a big house garden)</option><option value="0.6" selected>Medium (about half a football field)</option><option value="1.5">Large (about 2 football fields)</option><option value="3">Very large</option></select><p class=hint>1 hectare is about 1.4 football fields.</p></div><div class="f"><label for="s_slope">Is your land flat or sloped?</label><select id="s_slope"><option value="flat">Flat</option><option value="gentle">A little sloped</option><option value="moderate" selected>Hilly</option><option value="steep">Very steep</option></select></div><div class="f"><label for="s_soil">How well do crops grow in your soil?</label><select id="s_soil"><option value="low">Poorly (small, yellow plants)</option><option value="medium" selected>Okay</option><option value="high">Very well (dark, rich soil)</option></select></div><div class="f"><label for="s_labor">Who can work in the field?</label><select id="s_labor"><option value="low">Just me, or one other person</option><option value="medium" selected>A few people</option><option value="high">Many people</option></select></div><div class="row3">
+<div class="f"><label for="s_adults">Adults</label><input type="number" id="s_adults" min="0" max="50" value="2"></div>
+<div class="f"><label for="s_kids">Kids 5–14</label><input type="number" id="s_kids" min="0" max="50" value="2"></div>
+<div class="f"><label for="s_baby">Under 5</label><input type="number" id="s_baby" min="0" max="50" value="2"></div></div>
+<div class="f"><label for="s_goal">What matters most to you?</label><select id="s_goal"><option value="nutrition" selected>Feeding my family healthy food</option><option value="income">Earning money</option><option value="resilience">Not going hungry in a bad year</option><option value="balanced">A bit of everything</option><option value="fast_food">Getting food quickly</option></select></div><div class="f"><label for="s_sell">How much of the harvest do you sell?</label><select id="s_sell"><option value="0">None, we eat it all</option><option value="15">A little</option><option value="30" selected>Some</option><option value="50">About half</option><option value="75">Most of it</option></select></div><div class="f"><label for="s_water">Can you water the crops in a dry spell?</label><select id="s_water"><option value="0" selected>No</option><option value="100">Sometimes, by hand or buckets</option><option value="300">Yes, with a tank, pump or pipe</option></select></div><div class="f"><label for="s_garden">Do you have a vegetable garden?</label><select id="s_garden"><option value="0">No</option><option value="50">Small</option><option value="200" selected>Medium</option><option value="500">Large</option></select></div><div class="f"><span class="lab">What do you already do?</span>
+<label class="chk"><input type="checkbox" id="s_mulch" checked> Cover the soil with leaves or straw</label>
+<label class="chk"><input type="checkbox" id="s_compost"> Add compost or animal manure</label>
+<label class="chk"><input type="checkbox" id="s_windbreak"> Have trees or a fence that block the wind</label>
+<label class="chk"><input type="checkbox" id="s_terraces"> Have terraces (flat steps) on a slope</label></div>
+<div class="sum hint" id="simpleSummary"></div>
+</div>
+<div id="detailed" hidden>
   <details open><summary>Season &amp; climate</summary>
     <div class="row2">
       <div class="f"><label for="season">Season</label>
@@ -140,7 +160,7 @@ svg text{fill:var(--muted);font:11px system-ui,sans-serif}
 
   <details open><summary>Land</summary>
     <div class="row2">
-      <div class="f"><label for="land_ha">Land (hectares)</label><input type="number" id="land_ha" step="0.05" min="0.01" value="0.6"></div>
+      <div class="f"><label for="land_ha">Land (hectares)</label><input type="number" id="land_ha" step="any" min="0.01" value="0.6"></div>
       <div class="f"><label for="slope">Slope</label>
         <select id="slope"><option>flat</option><option>gentle</option><option selected>moderate</option><option>steep</option></select></div>
     </div>
@@ -190,6 +210,7 @@ svg text{fill:var(--muted);font:11px system-ui,sans-serif}
       <p class="hint">Same seed + same inputs = same result.</p></div>
   </details>
 
+</div>
   <button class="run" id="run" type="submit">Run simulation</button>
   <button class="ghost" id="reset" type="button">Reset to defaults</button>
 </form>
@@ -208,7 +229,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const pc = x => Math.round(x * 100) + "%";
 const fmt = (x, d = 0) => Number(x).toLocaleString(undefined, {minimumFractionDigits: d, maximumFractionDigits: d});
 const LABEL = {kcal: "Energy", iron: "Iron", vita: "Vitamin A", protein: "Protein"};
-let lastReport = null, lastBody = null;
+let lastReport = null;
 
 /* ---------- theme ---------- */
 (function(){
@@ -263,7 +284,56 @@ function payload() {
   };
 }
 
-$("reset").addEventListener("click", () => { $("form").reset(); for (const id of ["forecast_confidence","cyclone_prob","sell_fraction"]) $(id).dispatchEvent(new Event("input")); $("no_forecast").dispatchEvent(new Event("change")); });
+$("reset").addEventListener("click", () => { HTMLFormElement.prototype.reset.call($("form")); for (const id of ["forecast_confidence","cyclone_prob","sell_fraction"]) $(id).dispatchEvent(new Event("input")); $("no_forecast").dispatchEvent(new Event("change")); });
+
+/* ---------- simple mode: plain answers -> technical inputs ---------- */
+const sv = id => $(id).value;
+function setVal(id, v) { $(id).value = v; $(id).dispatchEvent(new Event("input")); }
+function applySimple() {
+  const hist = $("hist_rain_mm").value.split(/[,;\s]+/).filter(Boolean).map(Number).filter(x => !Number.isNaN(x));
+  const base = hist.length ? hist.reduce((a, b) => a + b, 0) / hist.length : 1000;
+  const rain = Math.round(base * Number(sv("s_rain")));
+  setVal("season", sv("s_season"));
+  $("no_forecast").checked = false; $("no_forecast").dispatchEvent(new Event("change"));
+  setVal("forecast_rain_mm", rain);
+  setVal("forecast_confidence", 40);          // a farmer's feeling is not a weather forecast
+  setVal("mean_temp_c", sv("s_place"));
+  setVal("cyclone_prob", sv("s_cyclone"));
+  setVal("land_ha", sv("s_land"));
+  setVal("slope", sv("s_slope"));
+  setVal("soil_fertility", sv("s_soil"));
+  setVal("labor", sv("s_labor"));
+  setVal("adults", sv("s_adults") || 0);
+  setVal("children_5_14", sv("s_kids") || 0);
+  setVal("children_u5", sv("s_baby") || 0);
+  setVal("priority", sv("s_goal"));
+  setVal("sell_fraction", sv("s_sell"));
+  setVal("irrigation_mm", sv("s_water"));
+  setVal("garden_m2", sv("s_garden"));
+  $("mulch").checked = $("s_mulch").checked;
+  $("compost").checked = $("s_compost").checked;
+  $("windbreak").checked = $("s_windbreak").checked;
+  for (const c of document.querySelectorAll('input[name="conservation"]')) if (c.value === "terraces") c.checked = $("s_terraces").checked;
+  $("simpleSummary").innerHTML = "The app will use: rainfall about <b>" + fmt(rain) + " mm</b>, <b>" + sv("s_land") + " ha</b> of land, " +
+    "<b>" + sv("s_cyclone") + "%</b> storm chance, temperature <b>" + sv("s_place") + " °C</b>, " + (Number(sv("s_adults")) + Number(sv("s_kids")) + Number(sv("s_baby"))) + " people.";
+}
+let simpleMode = true;
+function setMode(simple) {
+  simpleMode = simple;
+  $("simple").hidden = !simple; $("detailed").hidden = simple;
+  $("modeSimple").setAttribute("aria-pressed", simple); $("modeDetailed").setAttribute("aria-pressed", !simple);
+  if (simple) applySimple();
+}
+$("modeSimple").addEventListener("click", () => setMode(true));
+$("modeDetailed").addEventListener("click", () => setMode(false));
+$("simple").addEventListener("input", applySimple);
+$("simple").addEventListener("change", applySimple);
+$("reset").addEventListener("click", () => {
+  for (const el of $("simple").querySelectorAll("input,select")) if (el.type === "checkbox") el.checked = el.defaultChecked; else el.value = el.defaultValue ?? el.value;
+  for (const s of $("simple").querySelectorAll("select")) s.selectedIndex = [...s.options].findIndex(o => o.defaultSelected);
+  if (simpleMode) applySimple();
+});
+applySimple();
 
 /* ---------- run ---------- */
 $("form").addEventListener("submit", async ev => {
@@ -276,7 +346,7 @@ $("form").addEventListener("submit", async ev => {
     const res = await fetch("/api/simulate", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
     const data = await res.json().catch(() => ({error: "The server returned an unreadable response."}));
     if (!res.ok) throw new Error(data.error || ("Request failed (" + res.status + ")"));
-    lastReport = data; lastBody = body;
+    lastReport = data;
     render(data);
     if (window.innerWidth <= 900) $("out").scrollIntoView({behavior: "smooth"});
   } catch (e) {
@@ -377,29 +447,9 @@ function render(d) {
 
   if (d.excluded.length) h.push(`<div class="panel card"><h2>Crops excluded this season</h2><ul class="tips">${d.excluded.map(r => `<li><b>${esc(r.name)}:</b> ${esc(r.excluded)}</li>`).join("")}</ul></div>`);
 
-  h.push(`<div class="panel card" id="aiCard"><h2>Explain in simple words (AI)</h2>
-    <p class="hint">Claude rewrites the results above in plain language. It only uses the simulator's numbers.</p>
-    <div style="display:flex;gap:8px;margin:8px 0"><select id="aiLang" style="max-width:220px"><option value="en">English</option><option value="fr">Français</option><option value="zdj">Shikomori</option><option value="ar">العربية</option></select>
-    <button class="tbtn" type="button" id="aiBtn">Explain</button></div>
-    <div id="aiOut" style="white-space:pre-wrap"></div>
-    <p class="hint" id="aiNote" style="display:none">AI-written; Shikomori in particular may contain mistakes. Check with a local extension officer.</p></div>`);
-
   h.push(`<details class="panel card"><summary style="padding:0">Full text report</summary><pre class="txt">${esc(d.text_report)}</pre></details>`);
 
   $("out").innerHTML = h.join("");
-  $("aiBtn").addEventListener("click", async () => {
-    const btn = $("aiBtn"), box = $("aiOut"), lang = $("aiLang").value;
-    btn.disabled = true; btn.textContent = "Writing…"; box.textContent = "";
-    try {
-      const res = await fetch("/api/explain", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({...lastBody, language: lang})});
-      const data = await res.json().catch(() => ({error: "Unreadable server response."}));
-      if (!res.ok) throw new Error(data.error || ("Request failed (" + res.status + ")"));
-      box.dir = lang === "ar" ? "rtl" : "ltr";
-      box.textContent = data.text;
-      $("aiNote").style.display = "block";
-    } catch (e) { box.dir = "ltr"; box.textContent = "Could not get an explanation: " + e.message; }
-    finally { btn.disabled = false; btn.textContent = "Explain"; }
-  });
   $("dlJson").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(lastReport, null, 2)], {type: "application/json"});
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "crop-simulation-report.json"; a.click(); URL.revokeObjectURL(a.href);

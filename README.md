@@ -32,8 +32,5 @@ python app.py     # http://localhost:3000
 - All agronomic parameters are approximate. Calibrate with local extension data before relying on results.
 - If the app fails at startup, the page shows the error text instead of a generic 500.
 
-## AI explainer
-`POST /api/explain` takes the same inputs as `/api/simulate` plus `"language"` (`en`, `fr`, `ar`, `zdj` = Shikomori). The server re-runs the simulation, sends only a compact summary of its results to Claude, and returns a plain-language explanation. The AI never sees free-form user text, so it can only restate the simulator's numbers.
-
-Setup: in Vercel > Project > Settings > Environment Variables add `ANTHROPIC_API_KEY` (optionally `AI_MODEL`, default `claude-sonnet-5-5`), then redeploy. Without the key the rest of the app works and the Explain button shows a "not configured" message.
-Note: Shikomori output can contain mistakes; have a native speaker check it before real use.
+## Simple mode
+The form opens in **Simple** mode: about 15 plain questions (rain this year, farm location, land size, family, goals, ...). Each answer is translated into the simulator's technical inputs (rainfall mm, temperature, cyclone chance, hectares, etc.) in the browser, with no extra server code or AI. The **Detailed** tab shows and lets you edit the technical values it filled in. The mapping is in `applySimple()` in `index.html`.
